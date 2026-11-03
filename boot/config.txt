@@ -1,4 +1,4 @@
-# Kernel
+isa# Kernel
 kernel=Image
 
 # Ramdisk
@@ -34,3 +34,10 @@ dtoverlay=dwc2,dr_mode=peripheral
 [cm5]
 dtoverlay=dwc2,dr_mode=otg
 [all]
+
+# Fix the 8" Amazon display to not flicker color
+hdmi_blanking=0
+hdmi_force_hotplug=1
+
+# Enable Rechargable RTC battery
+dtparam=rtc_bbat_vchg=3000000
