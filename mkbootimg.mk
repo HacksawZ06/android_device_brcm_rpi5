@@ -8,7 +8,16 @@ DEVICE_PATH := device/brcm/rpi5
 KERNEL_PATH := device/brcm/rpi5-kernel
 
 RPI_BOOT_OUT := $(PRODUCT_OUT)/rpiboot
-$(RPI_BOOT_OUT): $(INSTALLED_RAMDISK_TARGET)
+
+#Changes suggested by Gemini, due to make bootimage failure, output: out/target/product/rpi5/rpiboot
+ # input: out/target/product/rpi5/ramdisk.img
+ #ninja: outputs should be files, not directories: out/target/product/rpi5/rpiboot
+
+RPI_BOOT_STAMP := $(RPI_BOOT_OUT)/.stamp
+
+#$(RPI_BOOT_OUT): $(INSTALLED_RAMDISK_TARGET)
+$(RPI_BOOT_STAMP): $(INSTALLED_RAMDISK_TARGET)
+	rm -rf $(RPI_BOOT_OUT)
 	mkdir -p $(RPI_BOOT_OUT)
 	mkdir -p $(RPI_BOOT_OUT)/overlays
 	cp $(DEVICE_PATH)/boot/* $(RPI_BOOT_OUT)
@@ -17,8 +26,10 @@ $(RPI_BOOT_OUT): $(INSTALLED_RAMDISK_TARGET)
 	cp $(KERNEL_PATH)/overlays/* $(RPI_BOOT_OUT)/overlays
 	cp $(PRODUCT_OUT)/ramdisk.img $(RPI_BOOT_OUT)
 	echo $(BOARD_KERNEL_CMDLINE) > $(RPI_BOOT_OUT)/cmdline.txt
+	touch $@
 
-$(INSTALLED_BOOTIMAGE_TARGET): $(RPI_BOOT_OUT)
+#$(INSTALLED_BOOTIMAGE_TARGET): $(RPI_BOOT_OUT)
+$(INSTALLED_BOOTIMAGE_TARGET): $(RPI_BOOT_STAMP)
 	$(call pretty,"Target boot image: $@")
 	dd if=/dev/zero of=$@ bs=1M count=128
 	mkfs.fat -F 32 -n "boot" $@
